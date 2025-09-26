@@ -1,6 +1,6 @@
 use std::time;
 
-use crate::{core::init::init, wintracker::windows::get_current_active_process_name};
+use crate::{core::init::init, wintracker::windows::get_current_active_process};
 
 mod wintracker;
 mod core;
@@ -10,8 +10,8 @@ fn main() {
     init();
     loop{
         unsafe{
-            let title = get_current_active_process_name();
-            println!("{}",title);
+            let process = get_current_active_process();
+            println!("process title: {}, process program name: {}",process.title_name,process.exec_name);
             std::thread::sleep(time::Duration::from_secs(5));
         }
     }
