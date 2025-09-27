@@ -33,10 +33,14 @@ unsafe fn current_active_window_handle_to_process_handle(window_handle:*mut HWND
     }
 }
 
-fn parse_process_exec_name(name:&str)->Option<String>{
-
-    name.rsplit('\\').next().map(|name|{
-        name.strip_suffix(".exe").unwrap_or(name).to_string()
+fn parse_process_exec_name(name: &str) -> Option<String> {
+    name.rsplit('\\').next().map(|name| {
+        let base = name.strip_suffix(".exe").unwrap_or(name);
+        let mut chars = base.chars();
+        match chars.next() {
+            Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+            None => String::new(),
+        }
     })
 }
 
