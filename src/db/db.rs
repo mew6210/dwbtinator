@@ -61,3 +61,7 @@ pub fn push_process_to_db(con:&Connection,exec_name: &str) {
     let program_id = get_program_id(&con, exec_name).unwrap_or_else(|| insert_program(&con, exec_name));
     insert_data_raw(&con, program_id);
 }
+
+pub fn squash_data(con: &Connection){
+    
+}
