@@ -1,4 +1,4 @@
-use winapi::{ctypes::c_void, shared::{minwindef::{DWORD, FALSE}, windef::HWND__}, um::{processthreadsapi::OpenProcess, psapi::GetProcessImageFileNameA, winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}, winuser::{GetForegroundWindow, GetWindowThreadProcessId}}};
+use winapi::{ctypes::c_void, shared::{minwindef::{DWORD, FALSE, LRESULT}, windef::{HICON, HICON__, HWND__}}, um::{processthreadsapi::OpenProcess, psapi::GetProcessImageFileNameA, winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}, winuser::{GetForegroundWindow, GetWindowThreadProcessId, GCL_HICON, GCL_HICONSM, ICON_BIG, ICON_SMALL, ICON_SMALL2, WM_GETICON}}};
 
 #[cfg(windows)]
 use crate::core::process::Process;
@@ -65,6 +65,36 @@ pub unsafe  fn get_current_active_process() -> Process{
         let process_handle = current_active_window_handle_to_process_handle(window_handle);
         let exec_name = get_process_exec_name(process_handle);
         
-        Process { title_name: title_name, exec_name: parse_process_exec_name(&exec_name).unwrap_or(exec_name) }
+        let icon = load_process_icon_ptr(window_handle);
+
+        Process { title_name: title_name, exec_name: parse_process_exec_name(&exec_name).unwrap_or(exec_name),icon:None }
     }
+}
+
+pub unsafe fn load_process_icon_ptr(window_handle: *mut HWND__) -> Option<LRESULT>{
+    use winapi::um::winuser::SendMessageA;
+    use winapi::um::winuser::GetClassLongPtrA;
+    let mut icon_ptr: LRESULT;
+    icon_ptr = SendMessageA(window_handle,WM_GETICON,ICON_SMALL2.try_into().unwrap(),0);
+    if icon_ptr == 0 
+    {
+        icon_ptr = SendMessageA(window_handle,WM_GETICON,ICON_SMALL.try_into().unwrap(),0);
+    }
+    if icon_ptr == 0 
+    {
+        icon_ptr = SendMessageA(window_handle,WM_GETICON,ICON_BIG.try_into().unwrap(),0);
+    }
+    if icon_ptr == 0
+    {
+        icon_ptr = GetClassLongPtrA(window_handle, GCL_HICON).try_into().unwrap();
+    }
+    if icon_ptr == 0
+    {
+        icon_ptr = GetClassLongPtrA(window_handle, GCL_HICONSM).try_into().unwrap();
+    }
+
+    if icon_ptr == 0 {
+        return None;
+    }
+    return Some(icon_ptr);
 }
