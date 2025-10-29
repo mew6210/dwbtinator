@@ -1,4 +1,4 @@
-use winapi::{ctypes::c_void, shared::{minwindef::{DWORD, FALSE, LRESULT}, windef::{HICON, HICON__, HWND__}}, um::{processthreadsapi::OpenProcess, psapi::GetProcessImageFileNameA, winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}, winuser::{GetForegroundWindow, GetWindowThreadProcessId, GCL_HICON, GCL_HICONSM, ICON_BIG, ICON_SMALL, ICON_SMALL2, WM_GETICON}}};
+use winapi::{ctypes::c_void, shared::{minwindef::{DWORD, FALSE, LRESULT}, windef::{HWND__}}, um::{processthreadsapi::OpenProcess, psapi::GetProcessImageFileNameA, winnt::{PROCESS_QUERY_INFORMATION, PROCESS_VM_READ}, winuser::{GetForegroundWindow, GetWindowThreadProcessId, GCL_HICON, GCL_HICONSM, ICON_BIG, ICON_SMALL, ICON_SMALL2, WM_GETICON}}};
 
 #[cfg(windows)]
 use crate::core::process::Process;
@@ -75,6 +75,9 @@ pub unsafe fn load_process_icon_ptr(window_handle: *mut HWND__) -> Option<LRESUL
     use winapi::um::winuser::SendMessageA;
     use winapi::um::winuser::GetClassLongPtrA;
     let mut icon_ptr: LRESULT;
+    unsafe{
+
+    
     icon_ptr = SendMessageA(window_handle,WM_GETICON,ICON_SMALL2.try_into().unwrap(),0);
     if icon_ptr == 0 
     {
@@ -92,7 +95,7 @@ pub unsafe fn load_process_icon_ptr(window_handle: *mut HWND__) -> Option<LRESUL
     {
         icon_ptr = GetClassLongPtrA(window_handle, GCL_HICONSM).try_into().unwrap();
     }
-
+}
     if icon_ptr == 0 {
         return None;
     }
